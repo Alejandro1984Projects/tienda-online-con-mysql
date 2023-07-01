@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        #titulo{color: white; background-color: lightgray;}
+        #titulo label{margin-left: 15px;}
+        #menu{border: 1px solid;}
+        #menu label{margin-left: 15px;}
+	#cedula{margin-left:75px;}
+        #usuario{margin-left:17px;}
+        #consulta{text-align: center;}
+        #sectionusuarios{
+            display: grid;
+            grid-template-columns: 50% 50%;
+            margin-top: 100px;
+        }
+        #sectionusuarios div{
+            text-align: center;
+            padding: 30px;
+        }
+        #botones div{
+            text-align: center;
+            margin: 30px;            
+        }
+        #botones div button{margin-left: 30px;}
+    </style>
+    <script>
+    function limpiarentradas(){
+    	var cedula=document.getElementById("cedula");
+    	cedula.value="";
+    	var usuario=document.getElementById("usuario");
+		usuario.value="";
+    	var nombre=document.getElementById("nombre");
+		nombre.value="";
+    	var password=document.getElementById("password");
+		password.value="";
+    	var correo=document.getElementById("correo");
+		correo.value="";
+    }
+        function comenzar(){
+        	var botonconsultar=document.getElementById("consultar");
+        	botonconsultar.addEventListener("click",function(){
+        		var cedula=parseInt(document.getElementById("cedula").value);  
+        		if(cedula!="" && !Number.isNaN(cedula)){
+        		fetch('http://localhost:5000/usuarios/buscarUsuario/'+cedula)
+        		.then(response => response.json())
+                .then(json => {   
+                	if(json.usuario!=null){
+            		var usuario=document.getElementById("usuario");
+            		var nombre=document.getElementById("nombre");
+            		var password=document.getElementById("password");
+            		var correo=document.getElementById("correo");
+            		usuario.value=json.usuario;
+            		nombre.value=json.nombre_usuario;
+            		password.value=json.password;
+            		correo.value=json.email_usuario;
+                	}else{
+                		alert("Usuario Inexistente");
+                		limpiarentradas();}
+                });
+        		}else{
+            		alert("Usuario Inexistente");
+            		limpiarentradas();}
+                },false);
+        	var botoncrear=document.getElementById("crear");
+        	botoncrear.addEventListener("click",function(){
+        		var cedula=parseInt(document.getElementById("cedula").value);
+        		var usuario=document.getElementById("usuario").value;
+        		var nombre=document.getElementById("nombre").value;
+        		var password=document.getElementById("password").value;
+        		var correo=document.getElementById("correo").value;
+        		if(cedula!="" && !Number.isNaN(cedula) && usuario!="" &&
+        			nombre!="" && password!="" && correo!=""){
+        			alert("Usuario Creado");
+        		fetch('http://localhost:5000/usuarios/guardar', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                    	cedula_usuario: cedula,
+                    	email_usuario: correo,
+                    	nombre_usuario: nombre,
+                    	password: password,
+                    	usuario: usuario                      
+                    }),
+                    headers: {
+                        "Content-type": "application/json"
+                    }});        		
+        		}else{alert("Faltan datos del usuario");}
+        		limpiarentradas();
+                },false);
+        	var botonactualizar=document.getElementById("actualizar");
+        	botonactualizar.addEventListener("click",function(){
+        		var cedula=parseInt(document.getElementById("cedula").value);
+        		var usuario=document.getElementById("usuario").value;
+        		var nombre=document.getElementById("nombre").value;
+        		var password=document.getElementById("password").value;
+        		var correo=document.getElementById("correo").value;
+        		if(cedula!="" && !Number.isNaN(cedula) && usuario!="" &&
+        			nombre!="" && password!="" && correo!=""){
+            			alert("Datos del Usuario Actualizados");
+        		fetch('http://localhost:5000/usuarios/actualizar', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                    	cedula_usuario: cedula,
+                    	email_usuario: correo,
+                    	nombre_usuario: nombre,
+                    	password: password,
+                    	usuario: usuario                      
+                    }),
+                    headers: {
+                        "Content-type": "application/json"
+                    }});
+        		}else{alert("Datos faltantes");}
+        		limpiarentradas();
+                },false);
+        	var botonborrar=document.getElementById("borrar");
+        	botonborrar.addEventListener("click",function(){
+        		var cedula=parseInt(document.getElementById("cedula").value);
+        		if(cedula!="" && !Number.isNaN(cedula)){
+        			fetch('http://localhost:5000/usuarios/buscarUsuario/'+cedula)
+            		.then(response => response.json())
+                    .then(json => {        			
+        			if(json.cedula_usuario!=null){
+        				alert("Datos del Usuario Borrados");
+        		fetch('http://localhost:5000/usuarios/eliminar/'+cedula);
+        		}else{alert("Cedula Errada");}
+                    });
+        		}else{alert("Cedula Errada");}
+        		limpiarentradas();
+                },false);
+                
+            var etiquetausuarios=document.getElementById("usuarios");
+            etiquetausuarios.style.backgroundColor="lightgray";
+            var etiquetas=document.getElementsByName("opcion");
+            etiquetas.forEach(function(etiqueta){
+                etiqueta.addEventListener("mouseover",function(){
+                etiqueta.style.backgroundColor="lightgray";},false);
+                etiqueta.addEventListener("mouseleave" ,function(){
+                etiqueta.style.backgroundColor="white";
+                etiquetausuarios.style.backgroundColor="lightgray";
+                },false);           
+            });
+        }
+        window.addEventListener("load", comenzar,false);
+    </script>
+</head>
+<body>
+    <section>
+        <div id="titulo">
+            <label for="">
+                Tienda Generica
+            </label>
+        </div>
+        <div id="menu">
+            <label name="opcion" id="usuarios">Usuarios</label>
+            <label name="opcion" onclick="location.href='Clientes.html';">
+            Clientes</label>
+            <label name="opcion" onclick="location.href='Proveedores.html';">
+            Proveedores</label>
+            <label name="opcion" onclick="location.href='Productos.html';">
+            Productos</label>
+            <label name="opcion" onclick="location.href='Ventas.html';">
+            Ventas</label>
+            <label name="opcion" onclick="location.href='Reportes.html';">
+            Reportes</label>                         
+        </div>
+    </section>
+    <section id="sectionusuarios">
+        <div>
+            Cedula<input type="text" name="" id="cedula">
+        </div>
+        <div>
+            Usuario <input type="text" name="" id="usuario"> 
+        </div>
+        <div>
+            Nombre Completo <input type="text" name="" id="nombre">
+        </div>
+        <div>
+            Contraseña <input type="password" name="" id="password">
+        </div>
+        <div>
+            Correo Electronico <input type="email" name="" id="correo">
+        </div> 
+    </section>
+    <section id="botones">
+        <div>
+            <button value="Consultar" id="consultar">Consultar</button>
+            <button value="Crear" id="crear">Crear</button>
+            <button value="Actualizar" id="actualizar">Actualizar</button>
+            <button value="Borrar" id="borrar">Borrar</button>
+        </div>
+        
+    </section>
+</body>
+</html>

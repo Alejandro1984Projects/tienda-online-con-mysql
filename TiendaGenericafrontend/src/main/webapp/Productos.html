@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title></title>
+<style>
+        #titulo{color: white; background-color: lightgray;}
+        #titulo label{margin-left: 15px;}
+        #menu{border: 1px solid;}
+        #menu label{color: black; margin-left: 15px;}
+        #sectionentrada{text-align: center; margin-top: 250px;}
+        #sectionentrada button{margin-top:30px}
+    </style>
+    <script>
+        function comenzar(){
+        	
+        	var entradaarchivo=document.getElementById("entradaarchivo");
+        	var botonguardar=document.getElementById("guardar");
+        	botonguardar.addEventListener("click",function(){
+        		
+        		var archivo=entradaarchivo.value;
+        		var extPermitidas=/(.csv)$/i;
+        		if(entradaarchivo.value!=""){
+        		if(!extPermitidas.exec(archivo)){
+        			alert("Error: formato de archivo invalido");
+        			entradaarchivo.value="";
+        			return false;
+        		}else{
+        			let cantidadlineas=0;
+        			const reader=new FileReader();
+        			reader.onload=function(){
+        				try{
+        				const lines=reader.result.split('\n').map(function(line){
+        					return line.split(',')
+        				})
+        				
+        				for(i=0;i<lines.length;i++){
+        					let codigo=parseInt(lines[i][0]);
+        					let iva=parseFloat(lines[i][4]);
+        					let nit=parseInt(lines[i][2]);
+        					let pcompra=parseFloat(lines[i][3]);
+        					let pventa=parseFloat(lines[i][5]);
+        					        					
+        				if(!Number.isNaN(codigo) && !Number.isNaN(iva) &&
+        				!Number.isNaN(nit)&& !Number.isNaN(pcompra) &&
+        				!Number.isNaN(pventa) && lines[i].length==6){
+        					fetch('http://localhost:5000/proveedores/buscarporID/'+nit)
+        					.then(response => response.json())
+        			        .then(json => { 
+        					if(json.nitproveedor!=null){
+        					cantidadlineas++;
+        					if(cantidadlineas==lines.length){
+        	        				for(i=0;i<lines.length;i++){
+        	        				
+        	        				fetch('http://localhost:5000/productos/guardar', {
+        	                            method: 'POST',
+        	                            body: JSON.stringify({
+        	                            	codigo_producto: lines[i][0],
+        	                            	ivacompra: lines[i][4],
+        	                            	nitproveedor: lines[i][2],
+        	                            	nombre_producto: lines[i][1],
+        	                            	precio_compra: lines[i][3],
+        	                            	precio_venta: lines[i][5]
+        	                            }),
+        	                            headers: {
+        	                                "Content-type": "application/json"
+        	                            }});
+        	        				}
+        	        				alert("Archivo Cargado Exitosamente");
+        					}
+        					}else{
+        						alert("Error: NIT de Proveedor Inexistente");
+        						}
+        			        });
+        					}else{
+        						alert("Error: datos leidos invalidos");
+        						}
+        				
+        				}
+        				
+        				}catch(error){
+        					alert("Error: datos leidos invalidos");
+        					}
+        			}
+        			reader.readAsText(entradaarchivo.files[0]);
+        			entradaarchivo.value="";
+        		}
+        		}else{alert("Error: no se selecciono archivo para cargar");}
+                
+        	},false);
+
+        	var etiquetaproductos=document.getElementById("productos");
+            etiquetaproductos.style.backgroundColor="lightgray";
+            var etiquetas=document.getElementsByName("opcion");
+            etiquetas.forEach(function(etiqueta){
+                etiqueta.addEventListener("mouseover",function(){
+                etiqueta.style.backgroundColor="lightgray";},false);
+                etiqueta.addEventListener("mouseleave" ,function(){
+                etiqueta.style.backgroundColor="white";
+                etiquetaproductos.style.backgroundColor="lightgray";
+                },false);           
+            });
+        }
+        window.addEventListener("load", comenzar,false);
+    </script>
+</head>
+<body>
+<section>
+        <div id="titulo">
+            <label for="">
+                Tienda Generica
+            </label>
+        </div>
+        <div id="menu">
+            <label name="opcion" onclick="location.href='Usuarios.html';">
+            Usuarios</label>
+            <label name="opcion" onclick="location.href='Clientes.html';">
+            Clientes</label>
+            <label name="opcion" onclick="location.href='Proveedores.html';">
+            Proveedores</label>
+            <label name="opcion" id="productos">Productos</label>
+            <label name="opcion" onclick="location.href='Ventas.html';">
+            Ventas</label>
+            <label name="opcion" onclick="location.href='Reportes.html';">
+            Reportes</label>                         
+        </div>
+    </section>
+<section id="sectionentrada">
+<input type="file" id="entradaarchivo">
+<br>
+<button id="guardar">Guardar</button>
+</section>
+</body>
+</html>

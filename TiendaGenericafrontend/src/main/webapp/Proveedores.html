@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title></title>
+<style>
+        #titulo{color: white; background-color: lightgray;}
+        #titulo label{margin-left: 15px;}
+        #menu{border: 1px solid;}
+        #menu label{margin-left: 15px;}
+        #nit{margin-left:95px;}
+        #ciudad{margin-left:10px;}
+        #direccion{margin-left: 60px;}
+        #consulta{text-align: center;}        
+        #sectiondatos{
+            display: grid;
+            grid-template-columns: 50% 50%;
+            margin-top: 100px;
+        }
+        #sectiondatos div{
+            text-align: center;
+            padding: 30px;
+        }
+        #botones div{
+            text-align: center;
+            margin: 30px;            
+        }
+        #botones div button{margin-left: 30px;}
+    </style>
+    <script>
+    function limpiarentradas(){
+    	var nit=document.getElementById("nit");
+    	nit.value="";
+    	var ciudad=document.getElementById("ciudad");
+    	ciudad.value="";
+    	var direccion=document.getElementById("direccion");
+    	direccion.value="";
+    	var nombre=document.getElementById("nombre");
+		nombre.value="";
+    	var telefono=document.getElementById("telefono");
+    	telefono.value="";
+    	
+    }
+    function comenzar(){
+    var botonconsultar=document.getElementById("consultar");
+	botonconsultar.addEventListener("click",function(){
+		var nit=parseInt(document.getElementById("nit").value);
+		if(nit!="" && !Number.isNaN(nit)){
+		fetch('http://localhost:5000/proveedores/buscarporID/'+nit)
+		.then(response => response.json())
+        .then(json => {                	
+        	if(json.nitproveedor!=null){
+        	var ciudad=document.getElementById("ciudad");
+    		var direccion=document.getElementById("direccion");
+    		var nombre=document.getElementById("nombre");
+    		var telefono=document.getElementById("telefono");
+    		ciudad.value=json.ciudad_proveedor;
+    		direccion.value=json.direccion_proveedor;
+    		nombre.value=json.nombre_proveedor;
+    		telefono.value=json.telefono_proveedor;
+        	}else{
+        		alert("Proveedor Inexistente");
+        		limpiarentradas();}
+        }); 
+        }else{
+    		alert("Proveedor Inexistente");
+    		limpiarentradas();}
+        },false);
+	var botoncrear=document.getElementById("crear");
+	botoncrear.addEventListener("click",function(){
+		var nit=parseInt(document.getElementById("nit").value);
+		var ciudad=document.getElementById("ciudad").value;
+		var direccion=document.getElementById("direccion").value;
+		var nombre=document.getElementById("nombre").value;
+		var telefono=document.getElementById("telefono").value;
+		if(nit!="" && !Number.isNaN(nit) && ciudad!="" &&
+				direccion!="" && nombre!="" && telefono!=""){
+    			alert("Proveedor Creado");
+		fetch('http://localhost:5000/proveedores/guardar', {
+            method: 'POST',
+            body: JSON.stringify({
+            	nitproveedor: nit,
+            	ciudad_proveedor: ciudad,
+            	direccion_proveedor: direccion,
+            	nombre_proveedor: nombre,
+            	telefono_proveedor: telefono                      
+            }),
+            headers: {
+                "Content-type": "application/json"
+            }});
+		}else{alert("Faltan datos del proveedor");}
+		limpiarentradas();
+        },false);
+	var botonactualizar=document.getElementById("actualizar");
+	botonactualizar.addEventListener("click",function(){
+		var nit=parseInt(document.getElementById("nit").value);
+		var ciudad=document.getElementById("ciudad").value;
+		var direccion=document.getElementById("direccion").value;
+		var nombre=document.getElementById("nombre").value;
+		var telefono=document.getElementById("telefono").value;
+		if(nit!="" && !Number.isNaN(nit) && ciudad!="" &&
+				direccion!="" && nombre!="" && telefono!=""){
+        			alert("Datos del Proveedor Actualizados");
+		fetch('http://localhost:5000/proveedores/actualizar', {
+            method: 'POST',
+            body: JSON.stringify({
+            	nitproveedor: nit,
+            	ciudad_proveedor: ciudad,
+            	direccion_proveedor: direccion,
+            	nombre_proveedor: nombre,
+            	telefono_proveedor: telefono                      
+            }),
+            headers: {
+                "Content-type": "application/json"
+            }});
+		}else{alert("Datos faltantes");}
+		limpiarentradas();
+        },false);
+	var botonborrar=document.getElementById("borrar");
+	botonborrar.addEventListener("click",function(){
+		var nit=parseInt(document.getElementById("nit").value);
+		if(nit!="" && !Number.isNaN(nit)){
+			fetch('http://localhost:5000/proveedores/buscarporID/'+nit)
+    		.then(response => response.json())
+            .then(json => {        			
+			if(json.nitproveedor!=null){
+				alert("Datos del Proveedor Borrados");
+			fetch('http://localhost:5000/proveedores/eliminar/'+nit);
+			}else{alert("NIT Errado");}
+            });
+		}else{alert("NIT Errado");}
+		limpiarentradas();
+        },false);
+        
+            var etiquetaproveedores=document.getElementById("proveedores");
+            etiquetaproveedores.style.backgroundColor="lightgray";
+            var etiquetas=document.getElementsByName("opcion");
+            etiquetas.forEach(function(etiqueta){
+                etiqueta.addEventListener("mouseover",function(){
+                etiqueta.style.backgroundColor="lightgray";},false);
+                etiqueta.addEventListener("mouseleave" ,function(){
+                etiqueta.style.backgroundColor="white";
+                etiquetaproveedores.style.backgroundColor="lightgray";},false);           
+            });
+        }
+        window.addEventListener("load", comenzar,false);
+    </script>
+</head>
+<body>
+<section>
+        <div id="titulo">
+            <label for="">
+                Tienda Generica
+            </label>
+        </div>
+        <div id="menu">
+            <label name="opcion" onclick="location.href='Usuarios.html';">
+            Usuarios</label>
+            <label name="opcion" onclick="location.href='Clientes.html';">
+            Clientes</label>
+            <label name="opcion" id="proveedores">Proveedores</label>
+            <label name="opcion" onclick="location.href='Productos.html';">
+            Productos</label>
+            <label name="opcion" onclick="location.href='Ventas.html';">
+            Ventas</label>
+            <label name="opcion" onclick="location.href='Reportes.html';">
+            Reportes</label>                         
+        </div>
+    </section>
+    <section id="sectiondatos">
+        <div>
+            NIT<input type="text" name="" id="nit">
+        </div>
+        <div>
+            Telefono <input type="text" name="" id="telefono"> 
+        </div>
+        <div>
+            Nombre Proveedor <input type="text" name="" id="nombre">
+        </div>
+        <div>
+            Ciudad <input type="text" name="" id="ciudad">
+        </div>
+        <div>
+            Direccion <input type="text" name="" id="direccion">
+        </div> 
+    </section>
+    <section id="botones">
+        <div>
+            <button value="Consultar" id="consultar">Consultar</button>
+            <button value="Crear" id="crear">Crear</button>
+            <button value="Actualizar" id="actualizar">Actualizar</button>
+            <button value="Borrar" id="borrar">Borrar</button>
+        </div>
+        
+    </section>
+</body>
+</html>
